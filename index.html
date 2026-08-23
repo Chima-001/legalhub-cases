@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Chima Nnaji">
+  <title>LegalHub Case Search</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="min-h-screen flex flex-col items-center px-4 py-8"
+  style="background: linear-gradient(135deg, #fdf6e3 0%, #f9e2a7 100%);">
+
+  <div class="w-full max-w-2xl">
+    <div class="flex flex-col items-center mb-6">
+      <span class="font-semibold text-[#c98a1f] text-2xl">LegalHub Case Search</span>
+      <p class="text-sm text-gray-500 mt-1">Search cases relevant to your courses</p>
+    </div>
+
+    <div class="flex gap-2 mb-6">
+      <input id="search-input" type="text" placeholder="Search by case title or citation..."
+        class="flex-1 bg-white rounded-xl px-4 py-3 border border-gray-200 outline-none" />
+      <button id="search-btn" class="px-6 py-3 rounded-xl font-semibold text-gray-900"
+        style="background: linear-gradient(90deg, #ffd166, #f4a123); box-shadow: 0 8px 20px rgba(244, 161, 35, 0.4);">
+        Search
+      </button>
+    </div>
+
+    <div id="results" class="space-y-3"></div>
+    <p id="status-msg" class="text-sm text-gray-500 text-center mt-4"></p>
+
+    <div class="flex justify-center gap-3 mt-6">
+      <button id="prev-btn" class="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm disabled:opacity-40"
+        disabled>&larr; Prev</button>
+      <span id="page-indicator" class="text-sm text-gray-500 self-center">Page 1</span>
+      <button id="next-btn" class="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm disabled:opacity-40"
+        disabled>Next &rarr;</button>
+    </div>
+  </div>
+
+  <script src="supabase-client.js"></script>
+  <script>
+    const PAGE_SIZE = 20; // paginated fetch - never pull the whole table at once
+
+    let currentPage = 0;
+    let currentQuery = "";
+    // Client-side session cache: avoids re-fetching a page already loaded
+    // this session (e.g. navigating Prev/Next back and forth).
+    const pageCache = {};
+
+    const resultsEl = document.getElementById("results");
+    const statusEl = document.getElementById("status-msg");
+    const prevBtn = document.getElementById("prev-btn");
+    const nextBtn = document.getElementById("next-btn");
+    const pageIndicator = document.getElementById("page-indicator");
+    const searchInput = document.getElementById("search-input");
+
+    function cacheKey(query, page) {
+      return `${query}::${page}`;
+    }
+
+    async function loadPage(query, page) {
+      const key = cacheKey(query, page);
+
+      if (pageCache[key]) {
+        renderResults(pageCache[key]);
+        return;
+      }
+
+      statusEl.textContent = "Loading...";
+      const from = page * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
+      // Column-limited: list view only needs these fields, not full_text
+      let request = supabaseClient
+        .from("cases")
+        .select("id, title, citation, summary, court, date_decided")
+        .range(from, to)
+        .order("created_at", { ascending: false });
+
+      if (query) {
+        request = request.or(`title.ilike.%${query}%,citation.ilike.%${query}%`);
+      }
+
+      const { data, error } = await request;
+
+      if (error) {
+        statusEl.textContent = "Something went wrong loading results.";
+        return;
+      }
+
+      pageCache[key] = data;
+      renderResults(data);
+    }
+
+    function renderResults(cases) {
+      statusEl.textContent = cases.length === 0 ? "No cases found." : "";
+      resultsEl.innerHTML = cases.map(c => `
+        <a href="case.html?id=${c.id}" class="block bg-white rounded-xl p-4 border border-gray-200 hover:border-[#f4a123] transition">
+          <div class="font-semibold text-gray-800">${escapeHtml(c.title || "Untitled case")}</div>
+          <div class="text-sm text-gray-500">${escapeHtml(c.citation || "")} ${c.court ? "&middot; " + escapeHtml(c.court) : ""}</div>
+          ${c.summary ? `<div class="text-sm text-gray-600 mt-1 line-clamp-2">${escapeHtml(c.summary)}</div>` : ""}
+        </a>
+      `).join("");
+
+      prevBtn.disabled = currentPage === 0;
+      nextBtn.disabled = cases.length < PAGE_SIZE; // no full page = likely no more results
+      pageIndicator.textContent = `Page ${currentPage + 1}`;
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    document.getElementById("search-btn").addEventListener("click", () => {
+      currentQuery = searchInput.value.trim();
+      currentPage = 0;
+      loadPage(currentQuery, currentPage);
+    });
+
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("search-btn").click();
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if (currentPage > 0) {
+        currentPage--;
+        loadPage(currentQuery, currentPage);
+      }
+    });
+
+    nextBtn.addEventListener("click", () => {
+      currentPage++;
+      loadPage(currentQuery, currentPage);
+    });
+
+    // Initial load - most recent cases, page 1
+    loadPage(currentQuery, currentPage);
+  </script>
+  <footer class="mt-8 mb-2 flex flex-col items-center gap-2 text-xs text-gray-400">
+    <span>&copy; <span id="footer-year"></span> LegalHub</span>
+    <span class="flex items-center gap-1.5">
+      Powered by
+      <a href="https://clopertechnologies.netlify.app" target="_blank" rel="noopener noreferrer" class="inline-flex">
+        <img src="cloper-logo.svg" alt="Cloper Technologies" class="h-5" />
+      </a>
+    </span>
+  </footer>
+  <script>document.getElementById("footer-year").textContent = new Date().getFullYear();</script>
+</body>
+
+</html>
