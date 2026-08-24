@@ -15,13 +15,26 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="min-h-screen flex flex-col items-center px-4 py-8"
+<body class="min-h-screen flex flex-col items-center px-4 py-6 sm:py-8"
   style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
 
-  <div class="w-full max-w-2xl">
-    <div class="flex flex-col items-center mb-6">
-      <span class="font-semibold text-[#c98a1f] text-2xl">LegalHub Case Search</span>
-      <p class="text-sm text-gray-200 mt-1">Search cases relevant to your courses</p>
+  <header class="w-full max-w-2xl border-b border-white/15 pb-5">
+    <nav class="flex items-center justify-between gap-4" aria-label="Primary navigation">
+      <a href="index.html" class="flex items-center gap-3 text-white" aria-label="LegalHub home">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#c98a1f] text-lg font-bold text-slate-900">L</span>
+        <span>
+          <span class="block text-base font-semibold tracking-wide">LegalHub</span>
+          <span class="block text-xs text-slate-300">Case library</span>
+        </span>
+      </a>
+      <span class="text-sm font-medium text-[#f4c35e]">Search cases</span>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-2xl flex-1 pt-6">
+    <div class="mb-6">
+      <h1 class="text-2xl font-semibold text-white">Find a case</h1>
+      <p class="mt-1 text-sm text-slate-300">Search Nigerian case law relevant to your courses.</p>
     </div>
 
     <!-- Hero image placeholder - drop a file named "hero.jpg" in this folder,
@@ -30,7 +43,7 @@
     <div id="hero-frame"
       class="w-full h-40 md:h-56 rounded-2xl mb-6 overflow-hidden bg-white/10 border border-white/20 flex items-center justify-center bg-cover bg-center">
       <img id="hero-image" src="images/hero1.webp" alt="LegalHub"
-        class="w-full h-full object-cover transition-transform duration-500 ease-in-out"
+        class="w-full h-full object-cover opacity-100 transition-opacity duration-700 ease-in-out"
         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
       <span class="hidden text-white/50 text-sm">Hero image</span>
     </div>
@@ -54,7 +67,7 @@
       <button id="next-btn" class="px-4 py-2 rounded-lg bg-white border border-gray-200 text-sm disabled:opacity-40"
         disabled>Next &rarr;</button>
     </div>
-  </div>
+  </main>
 
   <script src="supabase-client.js"></script>
   <script>
@@ -71,26 +84,30 @@
     ];
     let heroImageIndex = heroImages.indexOf(heroImage.getAttribute("src"));
 
-    setInterval(() => {
+    function changeHeroImage() {
       let nextImageIndex;
 
       do {
         nextImageIndex = Math.floor(Math.random() * heroImages.length);
       } while (nextImageIndex === heroImageIndex);
 
-      heroImageIndex = nextImageIndex;
-      const nextImage = heroImages[heroImageIndex];
-      heroFrame.style.backgroundImage = `url("${nextImage}")`;
-      heroImage.classList.add("-translate-x-full");
+      const nextImage = heroImages[nextImageIndex];
+      const preloadedImage = new Image();
 
-      setTimeout(() => {
-        heroImage.src = nextImage;
-        heroImage.style.transition = "none";
-        heroImage.classList.remove("-translate-x-full");
-        void heroImage.offsetWidth;
-        heroImage.style.transition = "";
-      }, 500);
-    }, 5000);
+      preloadedImage.onload = () => {
+        heroImage.classList.replace("opacity-100", "opacity-0");
+
+        setTimeout(() => {
+          heroImage.src = nextImage;
+          heroImage.classList.replace("opacity-0", "opacity-100");
+          heroImageIndex = nextImageIndex;
+        }, 350);
+      };
+
+      preloadedImage.src = nextImage;
+    }
+
+    setInterval(changeHeroImage, 5000);
 
     const PAGE_SIZE = 20; // paginated fetch - never pull the whole table at once
 
@@ -191,14 +208,16 @@
     // Initial load - most recent cases, page 1
     loadPage(currentQuery, currentPage);
   </script>
-  <footer class="mt-8 mb-2 flex flex-col items-center gap-2 text-xs text-gray-300">
-    <span>&copy; <span id="footer-year"></span> LegalHub</span>
-    <span class="flex items-center gap-1.5">
-      Powered by
+  <footer class="w-full max-w-2xl mt-10 border-t border-white/15 pt-5 pb-2 text-xs text-slate-300">
+    <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
+      <span>&copy; <span id="footer-year"></span> LegalHub. Built for better case research.</span>
+      <span class="flex items-center gap-2">
+        <span>Powered by</span>
       <a href="https://clopertechnologies.netlify.app" target="_blank" rel="noopener noreferrer" class="inline-flex">
-        <img src="images/cloper-logo.svg" alt="Cloper Technologies" class="h-5" />
+        <img src="images/cloper-logo-light.svg" alt="Cloper Technologies" class="h-5" />
       </a>
-    </span>
+      </span>
+    </div>
   </footer>
   <script>document.getElementById("footer-year").textContent = new Date().getFullYear();</script>
 </body>

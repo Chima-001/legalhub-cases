@@ -15,10 +15,24 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
-<body class="min-h-screen px-4 py-8" style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
+<body class="min-h-screen flex flex-col items-center px-4 py-6 sm:py-8"
+  style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
 
-  <div class="max-w-2xl mx-auto">
-    <a href="index.html" class="text-sm text-[#c98a1f] hover:underline">&larr; Back to search</a>
+  <header class="w-full max-w-2xl border-b border-white/15 pb-5">
+    <nav class="flex items-center justify-between gap-4" aria-label="Primary navigation">
+      <a href="index.html" class="flex items-center gap-3 text-white" aria-label="LegalHub home">
+        <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-[#c98a1f] text-lg font-bold text-slate-900">L</span>
+        <span>
+          <span class="block text-base font-semibold tracking-wide">LegalHub</span>
+          <span class="block text-xs text-slate-300">Case library</span>
+        </span>
+      </a>
+      <a href="index.html" class="text-sm font-medium text-[#f4c35e] hover:text-white">Search cases <span aria-hidden="true">&rarr;</span></a>
+    </nav>
+  </header>
+
+  <main class="w-full max-w-2xl flex-1 pt-6">
+    <a href="index.html" class="mb-5 inline-flex text-sm text-slate-300 hover:text-[#f4c35e]">&larr; Back to search</a>
 
     <div id="loading" class="text-center text-gray-200 mt-10">Loading case...</div>
 
@@ -40,7 +54,7 @@
     </div>
 
     <p id="error-msg" class="hidden text-center text-red-500 mt-10"></p>
-  </div>
+  </main>
 
   <script src="supabase-client.js"></script>
   <script>
@@ -115,14 +129,16 @@
 
     loadCase();
   </script>
-  <footer class="mt-8 mb-2 flex flex-col items-center gap-2 text-xs text-gray-300">
-    <span>&copy; <span id="footer-year"></span> LegalHub</span>
-    <span class="flex items-center gap-1.5">
-      Powered by
+  <footer class="w-full max-w-2xl mt-10 border-t border-white/15 pt-5 pb-2 text-xs text-slate-300">
+    <div class="flex flex-col items-center justify-between gap-3 sm:flex-row">
+      <span>&copy; <span id="footer-year"></span> LegalHub. Built for better case research.</span>
+      <span class="flex items-center gap-2">
+        <span>Powered by</span>
       <a href="https://clopertechnologies.netlify.app" target="_blank" rel="noopener noreferrer" class="inline-flex">
-        <img src="images/cloper-logo.svg" alt="Cloper Technologies" class="h-5" />
+        <img src="images/cloper-logo-light.svg" alt="Cloper Technologies" class="h-5" />
       </a>
-    </span>
+      </span>
+    </div>
   </footer>
   <script>document.getElementById("footer-year").textContent = new Date().getFullYear();</script>
 </body>
