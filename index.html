@@ -4,19 +4,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="Chima Nnaji">
+  <meta name="description" content="Search Nigerian case law relevant to your law courses.">
+  <meta property="og:title" content="LegalHub Case Search">
+  <meta property="og:description" content="Search Nigerian case law relevant to your law courses.">
+  <meta property="og:type" content="website">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="author" content="Chima Nnaji — Cloper Technologies">
   <title>LegalHub Case Search</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="min-h-screen flex flex-col items-center px-4 py-8"
-  style="background: linear-gradient(135deg, #fdf6e3 0%, #f9e2a7 100%);">
+  style="background: linear-gradient(135deg, #1e293b 0%, #334155 100%);">
 
   <div class="w-full max-w-2xl">
     <div class="flex flex-col items-center mb-6">
       <span class="font-semibold text-[#c98a1f] text-2xl">LegalHub Case Search</span>
-      <p class="text-sm text-gray-500 mt-1">Search cases relevant to your courses</p>
+      <p class="text-sm text-gray-200 mt-1">Search cases relevant to your courses</p>
+    </div>
+
+    <!-- Hero image placeholder - drop a file named "hero.jpg" in this folder,
+         recommended size 1200x400px (landscape banner), then this shows automatically.
+         Until then, this shows a plain placeholder box instead of a broken image icon. -->
+    <div id="hero-frame"
+      class="w-full h-40 md:h-56 rounded-2xl mb-6 overflow-hidden bg-white/10 border border-white/20 flex items-center justify-center bg-cover bg-center">
+      <img id="hero-image" src="images/hero1.webp" alt="LegalHub"
+        class="w-full h-full object-cover transition-transform duration-500 ease-in-out"
+        onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+      <span class="hidden text-white/50 text-sm">Hero image</span>
     </div>
 
     <div class="flex gap-2 mb-6">
@@ -42,6 +58,40 @@
 
   <script src="supabase-client.js"></script>
   <script>
+    const heroImage = document.getElementById("hero-image");
+    const heroFrame = document.getElementById("hero-frame");
+    const heroImages = [
+      "images/hero.webp",
+      "images/hero1.webp",
+      "images/hero2.webp",
+      "images/hero3.webp",
+      "images/hero4.webp",
+      "images/hero5.webp",
+      "images/hero6.webp",
+    ];
+    let heroImageIndex = heroImages.indexOf(heroImage.getAttribute("src"));
+
+    setInterval(() => {
+      let nextImageIndex;
+
+      do {
+        nextImageIndex = Math.floor(Math.random() * heroImages.length);
+      } while (nextImageIndex === heroImageIndex);
+
+      heroImageIndex = nextImageIndex;
+      const nextImage = heroImages[heroImageIndex];
+      heroFrame.style.backgroundImage = `url("${nextImage}")`;
+      heroImage.classList.add("-translate-x-full");
+
+      setTimeout(() => {
+        heroImage.src = nextImage;
+        heroImage.style.transition = "none";
+        heroImage.classList.remove("-translate-x-full");
+        void heroImage.offsetWidth;
+        heroImage.style.transition = "";
+      }, 500);
+    }, 5000);
+
     const PAGE_SIZE = 20; // paginated fetch - never pull the whole table at once
 
     let currentPage = 0;
@@ -141,12 +191,12 @@
     // Initial load - most recent cases, page 1
     loadPage(currentQuery, currentPage);
   </script>
-  <footer class="mt-8 mb-2 flex flex-col items-center gap-2 text-xs text-gray-400">
+  <footer class="mt-8 mb-2 flex flex-col items-center gap-2 text-xs text-gray-300">
     <span>&copy; <span id="footer-year"></span> LegalHub</span>
     <span class="flex items-center gap-1.5">
       Powered by
       <a href="https://clopertechnologies.netlify.app" target="_blank" rel="noopener noreferrer" class="inline-flex">
-        <img src="cloper-logo.svg" alt="Cloper Technologies" class="h-5" />
+        <img src="images/cloper-logo.svg" alt="Cloper Technologies" class="h-5" />
       </a>
     </span>
   </footer>
